@@ -1,0 +1,6 @@
+chromadb
+langchain-groq
+langchain-community
+beautifulsoup4
+lxml
+pickle

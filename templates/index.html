@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Email Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Cold Email Generator</h1>
+            <p class="text-gray-600 text-sm md:text-base">Generate personalized cold emails from job descriptions using AI</p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Input Section -->
+            <div class="mb-6">
+                <label for="jobLink" class="block text-lg font-semibold mb-2">
+                    Job Description Link
+                </label>
+                <input
+                    type="url"
+                    id="jobLink"
+                    placeholder="https://example.com/job-posting"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-black transition-colors"
+                />
+                <p class="text-xs text-gray-500 mt-1">Enter the URL of the job posting (LinkedIn, Indeed, company career page, etc.)</p>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="mb-8">
+                <button
+                    id="generateBtn"
+                    onclick="generateEmail()"
+                    class="w-full md:w-auto px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                    <span id="btnText">Generate Cold Email</span>
+                    <span id="btnLoader" class="hidden">
+                        <svg class="inline animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                    </span>
+                </button>
+            </div>
+
+            <!-- Output Section -->
+            <div id="outputSection" class="hidden">
+                <div class="border-2 border-gray-300 rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold">Generated Email</h2>
+                        <button
+                            onclick="copyEmail()"
+                            class="px-4 py-2 border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors text-sm font-medium"
+                        >
+                            Copy Email
+                        </button>
+                    </div>
+                    <div id="emailOutput" class="bg-gray-50 p-6 rounded-lg whitespace-pre-wrap text-sm md:text-base leading-relaxed">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+                <p class="text-red-800 font-medium"></p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>Powered by Gen AI</p>
+        </footer>
+    </div>
+
+    <script>
+        async function generateEmail() {
+            const jobLink = document.getElementById('jobLink').value.trim();
+            const generateBtn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const outputSection = document.getElementById('outputSection');
+            const emailOutput = document.getElementById('emailOutput');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Validation
+            if (!jobLink) {
+                showError('Please enter a job posting URL');
+                return;
+            }
+
+            // Validate URL format
+            try {
+                new URL(jobLink);
+            } catch (e) {
+                showError('Please enter a valid URL');
+                return;
+            }
+
+            // Hide previous results and errors
+            outputSection.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            // Show loading state
+            generateBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+
+            try {
+                // Call the API endpoint
+                const response = await fetch('/api/generate-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job_link: jobLink
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Check if request was successful
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to generate email');
+                }
+                
+                // Display the generated email
+                const generatedEmail = data.email;
+                if (!generatedEmail) {
+                    throw new Error('No email content received from API');
+                }
+                
+                emailOutput.textContent = generatedEmail;
+                outputSection.classList.remove('hidden');
+
+                // Scroll to output
+                outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'Failed to generate email. Please try again.');
+            } finally {
+                // Reset button state
+                generateBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnLoader.classList.add('hidden');
+            }
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.querySelector('p').textContent = message;
+            errorMessage.classList.remove('hidden');
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        function copyEmail() {
+            const emailText = document.getElementById('emailOutput').textContent;
+            navigator.clipboard.writeText(emailText).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('bg-black', 'text-white');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('bg-black', 'text-white');
+                }, 2000);
+            }).catch(err => {
+                showError('Failed to copy email');
+            });
+        }
+
+        // Allow Enter key to trigger generation
+        document.getElementById('jobLink').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                generateEmail();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETL & Feature Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black min-h-screen">
+    <!-- Load CSV Screen -->
+    <div id="loadScreen" class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">ETL & Feature Engineering</h1>
+            <p class="text-gray-600 text-sm md:text-base">Transform and engineer features from your CSV data</p>
+        </header>
+
+        <div class="border-2 border-gray-300 rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Load CSV File</h2>
+            
+            <div class="mb-6">
+                <label for="filePath" class="block text-sm font-semibold mb-2">
+                    CSV File Path
+                </label>
+                <input
+                    type="text"
+                    id="filePath"
+                    placeholder="/path/to/your/data.csv"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-black transition-colors"
+                />
+                <p class="text-xs text-gray-500 mt-1">Enter the full path to your CSV file on the server</p>
+            </div>
+
+            <button
+                onclick="loadCSV()"
+                id="loadBtn"
+                class="w-full px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400"
+            >
+                <span id="loadBtnText">Load CSV</span>
+                <span id="loadBtnLoader" class="hidden">Loading...</span>
+            </button>
+
+            <div id="loadError" class="hidden mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+                <p class="text-red-800 font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ETL Operations Screen -->
+    <div id="etlScreen" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-black text-white px-4 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold">ETL & Feature Engineering</h1>
+                <p class="text-sm text-gray-300" id="fileInfo"></p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="resetData()" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm">
+                    Reset
+                </button>
+                <button onclick="exportData()" class="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-semibold">
+                    Export
+                </button>
+            </div>
+        </header>
+
+        <div class="flex h-screen">
+            <!-- Sidebar - Operations -->
+            <div class="w-80 bg-gray-50 border-r overflow-y-auto p-4">
+                <h2 class="text-lg font-bold mb-4">Operations</h2>
+
+                <!-- Missing Values -->
+                <div class="mb-4 border-2 border-gray-300 rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Handle Missing Values</h3>
+                    <select id="missingStrategy" class="w-full px-3 py-2 border rounded mb-2 text-sm">
+                        <option value="drop">Drop Rows</option>
+                        <option value="mean">Fill with Mean</option>
+                        <option value="median">Fill with Median</option>
+                        <option value="mode">Fill with Mode</option>
+                        <option value="forward_fill">Forward Fill</option>
+                        <option value="backward_fill">Backward Fill</option>
+                    </select>
+                    <button onclick="handleMissing()" class="w-full px-4 py-2 bg-black text-white rounded text-sm">
+                        Apply
+                    </button>
+                </div>
+
+                <!-- Encoding -->
+                <div class="mb-4 border-2 border-gray-300 rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Encode Categorical</h3>
+                    <input id="encodeColumns" placeholder="column1,column2" class="w-full px-3 py-2 border rounded mb-2 text-sm" />
+                    <select id="encodeMethod" class="w-full px-3 py-2 border rounded mb-2 text-sm">
+                        <option value="label">Label Encoding</option>
+                        <option value="onehot">One-Hot Encoding</option>
+                    </select>
+                    <button onclick="encodeCategorical()" class="w-full px-4 py-2 bg-black text-white rounded text-sm">
+                        Encode
+                    </button>
+                </div>
+
+                <!-- Scaling -->
+                <div class="mb-4 border-2 border-gray-300 rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Scale Features</h3>
+                    <input id="scaleColumns" placeholder="column1,column2" class="w-full px-3 py-2 border rounded mb-2 text-sm" />
+                    <select id="scaleMethod" class="w-full px-3 py-2 border rounded mb-2 text-sm">
+                        <option value="standard">Standard Scaler</option>
+                        <option value="minmax">MinMax Scaler</option>
+                        <option value="robust">Robust Scaler</option>
+                    </select>
+                    <button onclick="scaleFeatures()" class="w-full px-4 py-2 bg-black text-white rounded text-sm">
+                        Scale
+                    </button>
+                </div>
+
+                <!-- Feature Creation -->
+                <div class="mb-4 border-2 border-gray-300 rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Create Features</h3>
+                    <select id="featureType" class="w-full px-3 py-2 border rounded mb-2 text-sm">
+                        <option value="polynomial">Polynomial</option>
+                        <option value="log">Logarithm</option>
+                        <option value="sqrt">Square Root</option>
+                        <option value="binning">Binning</option>
+                    </select>
+                    <input id="featureColumn" placeholder="column name" class="w-full px-3 py-2 border rounded mb-2 text-sm" />
+                    <button onclick="createFeature()" class="w-full px-4 py-2 bg-black text-white rounded text-sm">
+                        Create
+                    </button>
+                </div>
+
+                <!-- Remove Outliers -->
+                <div class="mb-4 border-2 border-gray-300 rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Remove Outliers</h3>
+                    <input id="outlierColumns" placeholder="column1,column2" class="w-full px-3 py-2 border rounded mb-2 text-sm" />
+                    <select id="outlierMethod" class="w-full px-3 py-2 border rounded mb-2 text-sm">
+                        <option value="iqr">IQR Method</option>
+                        <option value="zscore">Z-Score</option>
+                    </select>
+                    <button onclick="removeOutliers()" class="w-full px-4 py-2 bg-black text-white rounded text-sm">
+                        Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content - Data Preview & History -->
+            <div class="flex-1 overflow-y-auto">
+                <!-- Data Info -->
+                <div class="p-4 bg-blue-50 border-b">
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm text-gray-600">Rows</p>
+                            <p class="text-2xl font-bold" id="rowCount">0</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Columns</p>
+                            <p class="text-2xl font-bold" id="columnCount">0</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Memory</p>
+                            <p class="text-2xl font-bold" id="memoryUsage">0 MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-b">
+                    <div class="flex">
+                        <button onclick="showTab('preview')" id="previewTab" class="px-6 py-3 font-semibold border-b-2 border-black">
+                            Data Preview
+                        </button>
+                        <button onclick="showTab('history')" id="historyTab" class="px-6 py-3 font-semibold text-gray-500">
+                            Transformation History
+                        </button>
+                        <button onclick="showTab('stats')" id="statsTab" class="px-6 py-3 font-semibold text-gray-500">
+                            Statistics
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-4">
+                    <!-- Preview Tab -->
+                    <div id="previewContent">
+                        <div id="dataPreview" class="overflow-x-auto">
+                            <p class="text-gray-500">Loading data...</p>
+                        </div>
+                    </div>
+
+                    <!-- History Tab -->
+                    <div id="historyContent" class="hidden">
+                        <div id="transformationHistory">
+                            <p class="text-gray-500">No transformations yet</p>
+                        </div>
+                    </div>
+
+                    <!-- Stats Tab -->
+                    <div id="statsContent" class="hidden">
+                        <div id="dataStats">
+                            <p class="text-gray-500">Loading statistics...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        let currentData = null;
+
+        async function loadCSV() {
+            const filePath = document.getElementById('filePath').value.trim();
+            const loadBtn = document.getElementById('loadBtn');
+            const btnText = document.getElementById('loadBtnText');
+            const btnLoader = document.getElementById('loadBtnLoader');
+            const errorDiv = document.getElementById('loadError');
+
+            if (!filePath) {
+                showLoadError('Please enter a file path');
+                return;
+            }
+
+            errorDiv.classList.add('hidden');
+            loadBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/etl/load-csv', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_path: filePath })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to load CSV');
+                }
+
+                const data = await response.json();
+                sessionId = data.session_id;
+                currentData = data.info;
+
+                // Switch to ETL screen
+                document.getElementById('loadScreen').classList.add('hidden');
+                document.getElementById('etlScreen').classList.remove('hidden');
+                document.getElementById('fileInfo').textContent = `File: ${filePath}`;
+
+                updateDataDisplay();
+
+            } catch (error) {
+                showLoadError(error.message);
+            } finally {
+                loadBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnLoader.classList.add('hidden');
+            }
+        }
+
+        function showLoadError(message) {
+            const errorDiv = document.getElementById('loadError');
+            errorDiv.querySelector('p').textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function updateDataDisplay() {
+            if (!currentData) return;
+
+            document.getElementById('rowCount').textContent = currentData.rows || 0;
+            document.getElementById('columnCount').textContent = currentData.columns || 0;
+            document.getElementById('memoryUsage').textContent = currentData.memory_usage || '0 MB';
+
+            // Update preview
+            if (currentData.preview) {
+                const preview = currentData.preview;
+                let html = '<table class="min-w-full border text-sm"><thead class="bg-gray-100"><tr>';
+                
+                if (preview.length > 0) {
+                    Object.keys(preview[0]).forEach(col => {
+                        html += `<th class="border px-4 py-2 text-left">${col}</th>`;
+                    });
+                    html += '</tr></thead><tbody>';
+
+                    preview.forEach(row => {
+                        html += '<tr>';
+                        Object.values(row).forEach(val => {
+                            html += `<td class="border px-4 py-2">${val}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                } else {
+                    html = '<p class="text-gray-500">No data available</p>';
+                }
+
+                document.getElementById('dataPreview').innerHTML = html;
+            }
+        }
+
+        async function handleMissing() {
+            const strategy = document.getElementById('missingStrategy').value;
+            await performOperation('/api/etl/handle-missing', {
+                session_id: sessionId,
+                strategy: strategy
+            });
+        }
+
+        async function encodeCategorical() {
+            const columns = document.getElementById('encodeColumns').value.split(',').map(c => c.trim());
+            const method = document.getElementById('encodeMethod').value;
+            
+            if (!columns[0]) {
+                alert('Please enter column names');
+                return;
+            }
+
+            await performOperation('/api/etl/encode-categorical', {
+                session_id: sessionId,
+                columns: columns,
+                method: method
+            });
+        }
+
+        async function scaleFeatures() {
+            const columns = document.getElementById('scaleColumns').value.split(',').map(c => c.trim());
+            const method = document.getElementById('scaleMethod').value;
+            
+            if (!columns[0]) {
+                alert('Please enter column names');
+                return;
+            }
+
+            await performOperation('/api/etl/scale-features', {
+                session_id: sessionId,
+                columns: columns,
+                method: method
+            });
+        }
+
+        async function createFeature() {
+            const type = document.getElementById('featureType').value;
+            const column = document.getElementById('featureColumn').value.trim();
+            
+            if (!column) {
+                alert('Please enter column name');
+                return;
+            }
+
+            const operation = { type: type, column: column };
+            if (type === 'polynomial') operation.degree = 2;
+            if (type === 'binning') operation.bins = 5;
+
+            await performOperation('/api/etl/create-features', {
+                session_id: sessionId,
+                operations: [operation]
+            });
+        }
+
+        async function removeOutliers() {
+            const columns = document.getElementById('outlierColumns').value.split(',').map(c => c.trim());
+            const method = document.getElementById('outlierMethod').value;
+            
+            if (!columns[0]) {
+                alert('Please enter column names');
+                return;
+            }
+
+            await performOperation('/api/etl/remove-outliers', {
+                session_id: sessionId,
+                columns: columns,
+                method: method,
+                threshold: 1.5
+            });
+        }
+
+        async function performOperation(endpoint, data) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Operation failed');
+                }
+
+                const result = await response.json();
+                alert('Operation completed successfully!');
+                
+                // Refresh data state
+                await refreshState();
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function refreshState() {
+            try {
+                const response = await fetch(`/api/etl/state/${sessionId}`);
+                const data = await response.json();
+                currentData = data;
+                updateDataDisplay();
+            } catch (error) {
+                console.error('Failed to refresh state:', error);
+            }
+        }
+
+        async function resetData() {
+            if (!confirm('Reset all transformations?')) return;
+
+            try {
+                const response = await fetch(`/api/etl/reset/${sessionId}`, { method: 'POST' });
+                const data = await response.json();
+                currentData = data.info;
+                updateDataDisplay();
+                alert('Data reset to original state');
+            } catch (error) {
+                alert('Failed to reset: ' + error.message);
+            }
+        }
+
+        async function exportData() {
+            const outputPath = prompt('Enter output file path:', '/tmp/processed_data.csv');
+            if (!outputPath) return;
+
+            try {
+                const response = await fetch('/api/etl/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        output_path: outputPath
+                    })
+                });
+
+                const result = await response.json();
+                alert(`Data exported successfully to ${outputPath}`);
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.getElementById('previewContent').classList.add('hidden');
+            document.getElementById('historyContent').classList.add('hidden');
+            document.getElementById('statsContent').classList.add('hidden');
+
+            // Reset tab styles
+            document.getElementById('previewTab').className = 'px-6 py-3 font-semibold text-gray-500';
+            document.getElementById('historyTab').className = 'px-6 py-3 font-semibold text-gray-500';
+            document.getElementById('statsTab').className = 'px-6 py-3 font-semibold text-gray-500';
+
+            // Show selected tab
+            if (tabName === 'preview') {
+                document.getElementById('previewContent').classList.remove('hidden');
+                document.getElementById('previewTab').className = 'px-6 py-3 font-semibold border-b-2 border-black';
+            } else if (tabName === 'history') {
+                document.getElementById('historyContent').classList.remove('hidden');
+                document.getElementById('historyTab').className = 'px-6 py-3 font-semibold border-b-2 border-black';
+                loadHistory();
+            } else if (tabName === 'stats') {
+                document.getElementById('statsContent').classList.remove('hidden');
+                document.getElementById('statsTab').className = 'px-6 py-3 font-semibold border-b-2 border-black';
+                loadStats();
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`/api/etl/history/${sessionId}`);
+                const data = await response.json();
+                
+                if (data.history && data.history.length > 0) {
+                    let html = '<div class="space-y-2">';
+                    data.history.forEach((item, index) => {
+                        html += `
+                            <div class="border-2 border-gray-300 rounded-lg p-4">
+                                <p class="font-semibold">${index + 1}. ${item.operation}</p>
+                                <p class="text-sm text-gray-600">${item.timestamp}</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    document.getElementById('transformationHistory').innerHTML = html;
+                } else {
+                    document.getElementById('transformationHistory').innerHTML = '<p class="text-gray-500">No transformations yet</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+
+        function loadStats() {
+            if (currentData && currentData.numeric_stats) {
+                let html = '<div class="overflow-x-auto"><table class="min-w-full border text-sm"><thead class="bg-gray-100"><tr>';
+                html += '<th class="border px-4 py-2">Statistic</th>';
+                
+                const cols = Object.keys(currentData.numeric_stats);
+                cols.forEach(col => {
+                    html += `<th class="border px-4 py-2">${col}</th>`;
+                });
+                html += '</tr></thead><tbody>';
+
+                const stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max'];
+                stats.forEach(stat => {
+                    html += `<tr><td class="border px-4 py-2 font-semibold">${stat}</td>`;
+                    cols.forEach(col => {
+                        const val = currentData.numeric_stats[col][stat];
+                        html += `<td class="border px-4 py-2">${typeof val === 'number' ? val.toFixed(2) : val}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table></div>';
+                document.getElementById('dataStats').innerHTML = html;
+            } else {
+                document.getElementById('dataStats').innerHTML = '<p class="text-gray-500">No statistics available</p>';
+            }
+        }
+    </script>
+</body>
+</html>
