@@ -13,12 +13,20 @@ import numpy as np
 
 from services.torch_service import ImageCSVLoader
 from sklearn.metrics import accuracy_score
+from config.logger import logger
+
 
 def get_device():
-    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"Using device: {device}")
+    return device
+
 
 def default_transforms(train: bool = True, img_size: int = 224):
     from torchvision import transforms
+
+    logger.info(f"Creating {'training' if train else 'validation'} transforms with image size {img_size}")
+
     if train:
         return transforms.Compose([
             transforms.Resize((img_size, img_size)),
@@ -35,12 +43,17 @@ def default_transforms(train: bool = True, img_size: int = 224):
             transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
         ])
 
+
 def build_model(num_classes: int, pretrained: bool = True):
+    logger.info(f"Building ResNet18 model — pretrained={pretrained}, num_classes={num_classes}")
     model = models.resnet18(pretrained=pretrained)
-    # replace final layer
+
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, num_classes)
+
+    logger.info("Model built successfully.")
     return model
+
 
 def train(
     train_csv: str,
@@ -53,10 +66,8 @@ def train(
     pretrained: bool = True,
     num_workers: int = 2
 ) -> Dict[str, Any]:
-    """
-    Train a ResNet18 classifier on CSV dataset and save .pt model.
-    Returns JSON-like dict with metrics and model path.
-    """
+
+    logger.info("Starting training process...")
     os.makedirs(model_dir, exist_ok=True)
     device = get_device()
 
@@ -65,12 +76,17 @@ def train(
     val_tf = default_transforms(train=False, img_size=img_size)
 
     # datasets & loaders
+    logger.info(f"Loading training dataset: {train_csv}")
     train_ds = ImageCSVLoader(train_csv, transform=train_tf)
+
+    logger.info(f"Loading validation dataset: {val_csv}")
     val_ds = ImageCSVLoader(val_csv, transform=val_tf)
 
-    # infer num classes from labels present
-    labels_all = np.unique(train_ds.df["label"].astype(int).values)
-    num_classes = int(labels_all.max()) + 1  # assumes labels are 0..C-1; adjust if needed
+    # number of classes
+    labels_all = np.unique(train_ds.data["label"].astype(int).values)
+    num_classes = int(labels_all.max()) + 1
+
+    logger.info(f"Detected {num_classes} classes from training dataset.")
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers)
@@ -91,11 +107,13 @@ def train(
     best_val_acc = 0.0
     best_model_path = None
 
+    logger.info(f"Training for {epochs} epochs.")
+
     for epoch in range(1, epochs + 1):
+        logger.info(f"----- Epoch {epoch}/{epochs} START -----")
+
         model.train()
         running_loss = 0.0
-        all_preds = []
-        all_targets = []
 
         for images, labels in train_loader:
             images = images.to(device)
@@ -112,22 +130,25 @@ def train(
         epoch_train_loss = running_loss / len(train_ds)
         history["train_loss"].append(epoch_train_loss)
 
+        logger.info(f"Epoch {epoch} - Training Loss: {epoch_train_loss:.4f}")
+
         # validation
         model.eval()
         val_loss = 0.0
-        preds = []
-        targets = []
+        preds, targets = [], []
+
         with torch.no_grad():
             for images, labels in val_loader:
                 images = images.to(device)
                 labels = labels.to(device)
+
                 outputs = model(images)
                 loss = criterion(outputs, labels)
                 val_loss += loss.item() * images.size(0)
 
                 _, pred_cls = torch.max(outputs, 1)
-                preds.extend(pred_cls.cpu().numpy().tolist())
-                targets.extend(labels.cpu().numpy().tolist())
+                preds.extend(pred_cls.cpu().numpy())
+                targets.extend(labels.cpu().numpy())
 
         epoch_val_loss = val_loss / len(val_ds)
         history["val_loss"].append(epoch_val_loss)
@@ -135,9 +156,13 @@ def train(
         epoch_val_acc = accuracy_score(targets, preds)
         history["val_acc"].append(epoch_val_acc)
 
+        logger.info(
+            f"Epoch {epoch} - Val Loss: {epoch_val_loss:.4f}, Val Accuracy: {epoch_val_acc:.4f}"
+        )
+
         scheduler.step(epoch_val_loss)
 
-        # Save best
+        # Save best model
         if epoch_val_acc > best_val_acc:
             best_val_acc = epoch_val_acc
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -145,13 +170,17 @@ def train(
             best_model_path = os.path.join(model_dir, model_filename)
             torch.save(model.state_dict(), best_model_path)
 
-        print(f"Epoch {epoch}/{epochs} — train_loss: {epoch_train_loss:.4f} val_loss: {epoch_val_loss:.4f} val_acc: {epoch_val_acc:.4f}")
+            logger.info(f"New best model saved: {best_model_path}")
 
-    # final save (if no best saved)
+        logger.info(f"----- Epoch {epoch}/{epochs} END -----")
+
     if best_model_path is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         best_model_path = os.path.join(model_dir, f"resnet18_final_{timestamp}.pt")
         torch.save(model.state_dict(), best_model_path)
+        logger.info(f"No best model found, saving final model: {best_model_path}")
+
+    logger.info("Training completed successfully!")
 
     return {
         "success": True,
