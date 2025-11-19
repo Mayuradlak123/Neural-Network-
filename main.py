@@ -17,6 +17,7 @@ from routers.torch_router import torch_router
 # Import your routers
 from routers.web_route import web_router
 from routers.email_router import email_router
+from routers.ann_router import ann_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_groq()
@@ -52,7 +53,7 @@ app.include_router(web_router)  # Web pages
 app.include_router(email_router , prefix="/api")  # API endpoints
 
 app.include_router(torch_router,prefix="/api/torch")
-
+app.include_router(ann_router,prefix="/api/ann")
 app.include_router(etl_web_router)
 app.include_router(etl_router, prefix="/api/etl")
 app.include_router(ml_router, prefix="/api/ml")
