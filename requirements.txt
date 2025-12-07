@@ -4,3 +4,5 @@ langchain-community
 beautifulsoup4
 lxml
 pickle
+lime
+shap
