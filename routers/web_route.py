@@ -13,6 +13,6 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 @web_router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """
-    Render the Cold Email Generator home page
+    Render the Neural Network Dashboard home page
     """
     return templates.TemplateResponse("index.html", {"request": request})
