@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,80 +14,131 @@
             color: #ffffff;
             overflow-x: hidden;
         }
+
         .glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
+
         .glass:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-5px);
             border-color: rgba(255, 255, 255, 0.2);
         }
+
         .gradient-text {
             background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .animate-pulse-slow {
             animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .7; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .7;
+            }
         }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
     <div class="absolute inset-0 z-[-1] opacity-20">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full filter blur-[100px] animate-pulse-slow"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full filter blur-[100px] animate-pulse-slow"></div>
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full filter blur-[100px] animate-pulse-slow">
+        </div>
+        <div
+            class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full filter blur-[100px] animate-pulse-slow">
+        </div>
     </div>
 
     <div class="container max-w-5xl">
         <!-- Header -->
         <header class="text-center mb-16">
-            <h1 class="text-6xl font-bold mb-4 tracking-tight">Neural Network <span class="gradient-text">Hub</span></h1>
-            <p class="text-xl text-gray-400 max-w-2xl mx-auto">Advanced suite for data transformation, neural network training, and computer vision exploration.</p>
+            <h1 class="text-6xl font-bold mb-4 tracking-tight">Neural Network <span class="gradient-text">Hub</span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">Advanced suite for data transformation, neural network
+                training, and computer vision exploration.</p>
         </header>
 
         <!-- Navigation Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- ETL Card -->
             <a href="/etl" class="glass rounded-3xl p-8 flex flex-col items-center text-center group">
-                <div class="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                <div
+                    class="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                 </div>
                 <h3 class="text-2xl font-bold mb-2">ETL Tool</h3>
-                <p class="text-gray-400 text-sm">Transform, clean, and engineer features from your raw CSV data for neural models.</p>
-                <div class="mt-8 text-blue-400 font-semibold group-hover:opacity-100 opacity-0 transition-opacity">Launch Dashboard &rarr;</div>
+                <p class="text-gray-400 text-sm">Transform, clean, and engineer features from your raw CSV data for
+                    neural models.</p>
+                <div class="mt-8 text-blue-400 font-semibold group-hover:opacity-100 opacity-0 transition-opacity">
+                    Launch Dashboard &rarr;</div>
             </a>
 
             <!-- ANN Card -->
             <div class="glass rounded-3xl p-8 flex flex-col items-center text-center group cursor-default">
-                <div class="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center mb-6 text-cyan-400 group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <div
+                    class="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center mb-6 text-cyan-400 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
                 <h3 class="text-2xl font-bold mb-2">ANN Models</h3>
-                <p class="text-gray-400 text-sm">Train multi-layer perceptrons on your structured datasets and monitor performance metrics.</p>
-                <div class="mt-8 text-cyan-400 font-semibold text-xs py-1 px-3 bg-cyan-500/10 rounded-full">Explore via API API</div>
+                <p class="text-gray-400 text-sm">Train multi-layer perceptrons on your structured datasets and monitor
+                    performance metrics.</p>
+                <div class="mt-8 text-cyan-400 font-semibold text-xs py-1 px-3 bg-cyan-500/10 rounded-full">Explore via
+                    API API</div>
             </div>
 
             <!-- Torch Card -->
             <div class="glass rounded-3xl p-8 flex flex-col items-center text-center group cursor-default">
-                <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 text-purple-400 group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div
+                    class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 text-purple-400 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
                 <h3 class="text-2xl font-bold mb-2">Torch Pipeline</h3>
-                <p class="text-gray-400 text-sm">PyTorch based computer vision experiments. Load and process images from structured data.</p>
-                <div class="mt-8 text-purple-400 font-semibold text-xs py-1 px-3 bg-purple-500/10 rounded-full">Explore via API API</div>
+                <p class="text-gray-400 text-sm">PyTorch based computer vision experiments. Load and process images from
+                    structured data.</p>
+                <div class="mt-8 text-purple-400 font-semibold text-xs py-1 px-3 bg-purple-500/10 rounded-full">Explore
+                    via API</div>
+            </div>
+
+            <!-- CNN Card -->
+            <div class="glass rounded-3xl p-8 flex flex-col items-center text-center group cursor-default">
+                <div
+                    class="w-16 h-16 bg-rose-500/20 rounded-2xl flex items-center justify-center mb-6 text-rose-400 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">CNN Tabular</h3>
+                <p class="text-gray-400 text-sm">Convolutional Neural Networks adapted for tabular data. Includes
+                    automated ETL and FE rule chains.</p>
+                <div class="mt-8 text-rose-400 font-semibold text-xs py-1 px-3 bg-rose-500/10 rounded-full">Execute via
+                    API</div>
             </div>
         </div>
 
@@ -96,4 +148,5 @@
         </footer>
     </div>
 </body>
+
 </html>

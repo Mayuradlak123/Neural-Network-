@@ -61,3 +61,16 @@ class ExportDataRequest(BaseModel):
 class EvaluateRequest(BaseModel):
     model_path: str
     test_data_path: str
+
+class CNNTrainRequest(BaseModel):
+    file_path: str
+    label_col: str
+    epochs: int = 50
+    lr: float = 0.001
+    batch_size: int = 32
+    save_processed: bool = True
+
+class CNNPredictRequest(BaseModel):
+    model_path: str
+    metadata_path: str
+    data: Dict[str, Any]
