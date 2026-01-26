@@ -6,3 +6,6 @@ lxml
 pickle
 lime
 shap
+nltk
+spacy
+regex

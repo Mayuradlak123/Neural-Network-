@@ -471,3 +471,37 @@ def cleanup_etl_session(session_id: str):
     """Clean up an ETL session"""
     if session_id in _etl_sessions:
         del _etl_sessions[session_id]
+
+
+# ===============================
+# FEATURE ENGINEERING
+# ===============================
+def feature_engineering(X: pd.DataFrame) -> pd.DataFrame:
+    logger.info("Starting feature engineering")
+    X = X.copy()
+
+    # Boolean mapping for categorical strings
+    bool_map = {
+        "yes": 1, "no": 0,
+        "Yes": 1, "No": 0,
+        True: 1, False: 0
+    }
+
+    for col in X.select_dtypes(include="object").columns:
+        X[col] = X[col].astype(str).str.lower()
+        X[col] = X[col].replace(bool_map)
+
+    # Furnishing status ordinal encoding
+    if "furnishingstatus" in X.columns:
+        X["furnishingstatus"] = X["furnishingstatus"].map({
+            "unfurnished": 0,
+            "semi-furnished": 1,
+            "furnished": 2
+        }).fillna(0)
+
+    # Log transform area
+    if "area" in X.columns:
+        X["log_area"] = np.log1p(X["area"])
+
+    logger.info("Feature engineering completed")
+    return X

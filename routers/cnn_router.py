@@ -41,7 +41,7 @@ async def predict_cnn(request: CNNPredictRequest):
         )
         return {
             "success": True,
-            "prediction": result["prediction"]
+            **result
         }
     except Exception as e:
         logger.error(f"CNN Prediction Error: {e}")
