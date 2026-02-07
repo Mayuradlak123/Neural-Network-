@@ -18,9 +18,11 @@ from routers.model_interpretability_router import model_interpretability_router
 from routers.cnn_router import cnn_router
 # Import your routers
 from routers.web_route import web_router
-from routers.web_route import web_router
+
 from routers.ann_router import ann_router
+
 from routers.activation_router import activation_router
+from routers.fnn_router import fnn_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -66,6 +68,7 @@ app.include_router(activation_router,prefix="/api/activation")
 
 # ANN Regression Router 
 app.include_router(reg_router, prefix="/api/rag")
+app.include_router(fnn_router, prefix="/api/fnn")
 # Health check endpoint
 @app.get("/health")
 def health_check():
